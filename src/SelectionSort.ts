@@ -43,7 +43,7 @@ export const generateSelectionSortSteps = (
         return steps;
     }
 
-    type: 'startPass', pushStep('startPass', 0, 0, 0, 'Starting Selection Sort.');
+    pushStep('startPass', 0, 0, 0, 'Starting Selection Sort.');
 
     for (let i = 0; i < n; i++) {
         let minIndex = i;

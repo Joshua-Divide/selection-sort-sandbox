@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { generateSelectionSortSteps, SortStep } from './SelectionSort';
+import { useState, useEffect, useRef } from 'react';
+import { generateSelectionSortSteps, type SortStep } from './SelectionSort';
 
 const initialArray = [
     { value: 29, id: '1' },
