@@ -2,7 +2,7 @@ name: Experiment 4 Transfer Learning Run
 
 on:
   push:
-    branches: [exp4-run-20260819]
+    branches: [exp4-run-20260819, exp4-fast-20260820]
   pull_request:
     branches: [main]
   workflow_dispatch:
