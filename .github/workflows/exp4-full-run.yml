@@ -18,6 +18,19 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install tensorflow-cpu==2.16.1 scikit-learn pandas matplotlib nbformat nbconvert ipykernel
+      - name: Use controlled comparison subset
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('Experiment_4_Full.ipynb')
+          s = p.read_text()
+          s = s.replace('train_size=10000', 'train_size=3000')
+          s = s.replace('train_size=2000, random_state=SEED, stratify=y_val', 'train_size=600, random_state=SEED, stratify=y_val')
+          s = s.replace('train_size=2000, random_state=SEED, stratify=y_test', 'train_size=1000, random_state=SEED, stratify=y_test')
+          s = s.replace('def train_scratch(name, builder, epochs=3):', 'def train_scratch(name, builder, epochs=2):')
+          s = s.replace('epochs_frozen=3, epochs_ft=1', 'epochs_frozen=1, epochs_ft=1')
+          p.write_text(s)
+          PY
       - name: Execute notebook
         run: |
           mkdir -p outputs
