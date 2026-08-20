@@ -23,9 +23,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install tensorflow-cpu==2.16.1 scikit-learn pandas matplotlib
       - name: Run complete experiment
-        run: python exp4_complete.py
-      - name: Commit measured results
-        if: success()
+        run: |
+          mkdir -p outputs_complete
+          set +e
+          python exp4_complete.py > outputs_complete/run.log 2>&1
+          code=$?
+          echo $code > outputs_complete/exit_code.txt
+          echo "Run completed with exit code $code"
+      - name: Commit measured results and log
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
