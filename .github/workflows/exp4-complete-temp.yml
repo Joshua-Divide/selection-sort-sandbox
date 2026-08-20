@@ -16,14 +16,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install tensorflow-cpu==2.16.1 scikit-learn pandas matplotlib
       - name: Load complete benchmark script
-        run: curl -fsSL https://raw.githubusercontent.com/Joshua-Divide/selection-sort-sandbox/exp4-complete-20260820/exp4_complete.py -o exp4_complete.py
+        run: curl -fsSL https://raw.githubusercontent.com/Joshua-Divide/selection-sort-sandbox/exp4-complete-20260820/exp4_quick.py -o exp4_quick.py
       - name: Run complete experiment
-        run: python exp4_complete.py
+        run: python exp4_quick.py
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: experiment-4-complete-results
+          name: experiment-4-complete-results-quick
           path: outputs_complete/
           if-no-files-found: warn
           retention-days: 7
