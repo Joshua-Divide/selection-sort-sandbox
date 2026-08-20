@@ -2,15 +2,17 @@ name: Experiment 4 Complete Run
 on:
   push:
     branches: [exp4-complete-20260820]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   run:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: exp4-complete-20260820
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -20,6 +22,14 @@ jobs:
           pip install tensorflow-cpu==2.16.1 scikit-learn pandas matplotlib
       - name: Run complete experiment
         run: python exp4_complete.py
+      - name: Commit measured results
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add outputs_complete/
+          git commit -m "Store complete Experiment 4 results" || exit 0
+          git push origin HEAD:exp4-complete-20260820
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v4
