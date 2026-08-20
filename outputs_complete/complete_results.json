@@ -1,0 +1,128 @@
+{
+  "benchmark_training_images": 4000,
+  "benchmark_validation_images": 1000,
+  "benchmark_testing_images": 1000,
+  "hyperparameter_study": [
+    {
+      "Setting": "Baseline",
+      "Learning Rate": 0.001,
+      "Batch Size": 32,
+      "Epochs": 10,
+      "Optimizer": "Adam",
+      "Dense Units": 128,
+      "Frozen Layers": "All",
+      "Best Validation Accuracy": 0.30720001459121704,
+      "Test Accuracy": 0.3046000003814697,
+      "Training Time (s)": 26.43274903800011
+    },
+    {
+      "Setting": "Learning rate 0.0001",
+      "Learning Rate": 0.0001,
+      "Batch Size": 32,
+      "Epochs": 10,
+      "Optimizer": "Adam",
+      "Dense Units": 128,
+      "Frozen Layers": "All",
+      "Best Validation Accuracy": 0.28459998965263367,
+      "Test Accuracy": 0.29319998621940613,
+      "Training Time (s)": 26.28222665499993
+    },
+    {
+      "Setting": "Batch size 16",
+      "Learning Rate": 0.001,
+      "Batch Size": 16,
+      "Epochs": 10,
+      "Optimizer": "Adam",
+      "Dense Units": 128,
+      "Frozen Layers": "All",
+      "Best Validation Accuracy": 0.3073999881744385,
+      "Test Accuracy": 0.30889999866485596,
+      "Training Time (s)": 48.188733903999946
+    },
+    {
+      "Setting": "Batch size 64",
+      "Learning Rate": 0.001,
+      "Batch Size": 64,
+      "Epochs": 10,
+      "Optimizer": "Adam",
+      "Dense Units": 128,
+      "Frozen Layers": "All",
+      "Best Validation Accuracy": 0.3041999936103821,
+      "Test Accuracy": 0.30979999899864197,
+      "Training Time (s)": 15.69780928099999
+    },
+    {
+      "Setting": "Epochs 20",
+      "Learning Rate": 0.001,
+      "Batch Size": 32,
+      "Epochs": 20,
+      "Optimizer": "Adam",
+      "Dense Units": 128,
+      "Frozen Layers": "All",
+      "Best Validation Accuracy": 0.3073999881744385,
+      "Test Accuracy": 0.31200000643730164,
+      "Training Time (s)": 52.18111426199994
+    },
+    {
+      "Setting": "Optimizer SGD",
+      "Learning Rate": 0.001,
+      "Batch Size": 32,
+      "Epochs": 10,
+      "Optimizer": "SGD",
+      "Dense Units": 128,
+      "Frozen Layers": "All",
+      "Best Validation Accuracy": 0.28279998898506165,
+      "Test Accuracy": 0.28380000591278076,
+      "Training Time (s)": 22.55161638499999
+    },
+    {
+      "Setting": "Dense units 256",
+      "Learning Rate": 0.001,
+      "Batch Size": 32,
+      "Epochs": 10,
+      "Optimizer": "Adam",
+      "Dense Units": 256,
+      "Frozen Layers": "All",
+      "Best Validation Accuracy": 0.3093999922275543,
+      "Test Accuracy": 0.3111000061035156,
+      "Training Time (s)": 31.75355373499997
+    }
+  ],
+  "architecture_comparison": [
+    {
+      "Model": "LeNet-5",
+      "Parameters": 62006,
+      "Accuracy": 0.3149999976158142,
+      "Accuracy (%)": 31.49999976158142,
+      "Training Time (s)": 4.037158523000016
+    },
+    {
+      "Model": "AlexNet",
+      "Parameters": 2388298,
+      "Accuracy": 0.26600000262260437,
+      "Accuracy (%)": 26.600000262260437,
+      "Training Time (s)": 97.28743591900002
+    },
+    {
+      "Model": "GoogleNet",
+      "Parameters": 637978,
+      "Accuracy": 0.26899999380111694,
+      "Accuracy (%)": 26.899999380111694,
+      "Training Time (s)": 65.19250591199989
+    },
+    {
+      "Model": "VGG16",
+      "Parameters": 14781642,
+      "Accuracy": 0.5019999742507935,
+      "Accuracy (%)": 50.199997425079346,
+      "Training Time (s)": 88.56947157900004
+    },
+    {
+      "Model": "ResNet50",
+      "Parameters": 23851274,
+      "Accuracy": 0.5720000267028809,
+      "Accuracy (%)": 57.200002670288086,
+      "Training Time (s)": 57.35248460699995
+    }
+  ]
+}
