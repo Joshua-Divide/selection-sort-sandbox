@@ -9,8 +9,6 @@ random.seed(SEED);np.random.seed(SEED);tf.random.set_seed(SEED)
 OUT=Path('outputs_complete');OUT.mkdir(exist_ok=True)
 (x_all,y_all),(x_test,y_test)=keras.datasets.cifar10.load_data();y_all=y_all.ravel();y_test=y_test.ravel()
 x_train,x_val,y_train,y_val=train_test_split(x_all,y_all,test_size=5000,random_state=SEED,stratify=y_all)
-
-# Complete hyperparameter study on a frozen ImageNet MobileNetV2 base
 pre=keras.applications.mobilenet_v2.preprocess_input
 base=keras.applications.MobileNetV2(weights='imagenet',include_top=False,input_shape=(32,32,3),pooling='avg');base.trainable=False
 def feats(x): return base.predict(pre(x.astype('float32')),batch_size=256,verbose=0)
@@ -26,11 +24,10 @@ def run(label,lr=.001,batch=32,epochs=10,opt='Adam',units=128):
  del m;gc.collect();return r
 hyp=[run('Baseline'),run('Learning rate 0.0001',lr=.0001),run('Batch size 16',batch=16),run('Batch size 64',batch=64),run('Epochs 20',epochs=20),run('Optimizer SGD',opt='SGD'),run('Dense units 256',units=256)]
 pd.DataFrame(hyp).to_csv(OUT/'hyperparameter_complete.csv',index=False)
-
-# Controlled architecture benchmark: same stratified 10k/2k/2k split for every model
-bx,_,by,_=train_test_split(x_train,y_train,train_size=10000,random_state=SEED,stratify=y_train)
-bv,_,bvy,_=train_test_split(x_val,y_val,train_size=2000,random_state=SEED,stratify=y_val)
-bt,_,bty,_=train_test_split(x_test,y_test,train_size=2000,random_state=SEED,stratify=y_test)
+# Controlled architecture benchmark. All five models use the same fixed stratified subset.
+bx,_,by,_=train_test_split(x_train,y_train,train_size=4000,random_state=SEED,stratify=y_train)
+bv,_,bvy,_=train_test_split(x_val,y_val,train_size=1000,random_state=SEED,stratify=y_val)
+bt,_,bty,_=train_test_split(x_test,y_test,train_size=1000,random_state=SEED,stratify=y_test)
 xtr=bx.astype('float32')/255.;xva=bv.astype('float32')/255.;xte=bt.astype('float32')/255.
 def lenet():
  i=keras.Input((32,32,3));x=layers.Conv2D(6,5,activation='tanh')(i);x=layers.AveragePooling2D(2)(x);x=layers.Conv2D(16,5,activation='tanh')(x);x=layers.AveragePooling2D(2)(x);x=layers.Flatten()(x);x=layers.Dense(120,activation='tanh')(x);x=layers.Dense(84,activation='tanh')(x);return keras.Model(i,layers.Dense(10,activation='softmax')(x))
@@ -41,20 +38,17 @@ def inc(x,f):
 def googlenet():
  i=keras.Input((32,32,3));x=layers.Conv2D(64,3,padding='same',activation='relu')(i);x=layers.MaxPooling2D(2)(x);x=inc(x,64);x=inc(x,96);x=layers.MaxPooling2D(2)(x);x=inc(x,128);x=layers.GlobalAveragePooling2D()(x);x=layers.Dropout(.3)(x);return keras.Model(i,layers.Dense(10,activation='softmax')(x))
 def scratch(name,builder):
- tf.keras.backend.clear_session();m=builder();m.compile(optimizer=keras.optimizers.Adam(.001),loss='sparse_categorical_crossentropy',metrics=['accuracy']);t=time.perf_counter();m.fit(xtr,by,validation_data=(xva,bvy),epochs=5,batch_size=64,verbose=2);sec=time.perf_counter()-t;_,acc=m.evaluate(xte,bty,batch_size=256,verbose=0);r={'Model':name,'Parameters':int(m.count_params()),'Accuracy':float(acc),'Accuracy (%)':float(acc*100),'Training Time (s)':float(sec)};del m;gc.collect();return r
+ tf.keras.backend.clear_session();m=builder();m.compile(optimizer=keras.optimizers.Adam(.001),loss='sparse_categorical_crossentropy',metrics=['accuracy']);t=time.perf_counter();m.fit(xtr,by,validation_data=(xva,bvy),epochs=3,batch_size=64,verbose=2);sec=time.perf_counter()-t;_,acc=m.evaluate(xte,bty,batch_size=256,verbose=0);r={'Model':name,'Parameters':int(m.count_params()),'Accuracy':float(acc),'Accuracy (%)':float(acc*100),'Training Time (s)':float(sec)};del m;gc.collect();return r
 arch=[scratch('LeNet-5',lenet),scratch('AlexNet',alexnet),scratch('GoogleNet',googlenet)]
 def transfer(builder,prep,name,last):
- tf.keras.backend.clear_session();b=builder(weights='imagenet',include_top=False,input_shape=(32,32,3),pooling='avg');b.trainable=False;i=keras.Input((32,32,3));x=prep(i);x=b(x,training=False);x=layers.Dense(128,activation='relu')(x);m=keras.Model(i,layers.Dense(10,activation='softmax')(x));m.compile(optimizer=keras.optimizers.Adam(.001),loss='sparse_categorical_crossentropy',metrics=['accuracy']);t=time.perf_counter();m.fit(bx,by,validation_data=(bv,bvy),epochs=5,batch_size=64,verbose=2);b.trainable=True
- for_l= b.layers[:-last]
- for layer in for_l: layer.trainable=False
+ tf.keras.backend.clear_session();b=builder(weights='imagenet',include_top=False,input_shape=(32,32,3),pooling='avg');b.trainable=False;i=keras.Input((32,32,3));x=prep(i);x=b(x,training=False);x=layers.Dense(128,activation='relu')(x);m=keras.Model(i,layers.Dense(10,activation='softmax')(x));m.compile(optimizer=keras.optimizers.Adam(.001),loss='sparse_categorical_crossentropy',metrics=['accuracy']);t=time.perf_counter();m.fit(bx,by,validation_data=(bv,bvy),epochs=3,batch_size=64,verbose=2);b.trainable=True
+ for layer in b.layers[:-last]: layer.trainable=False
  for layer in b.layers[-last:]:
   if isinstance(layer,layers.BatchNormalization): layer.trainable=False
  m.compile(optimizer=keras.optimizers.Adam(1e-5),loss='sparse_categorical_crossentropy',metrics=['accuracy']);m.fit(bx,by,validation_data=(bv,bvy),epochs=1,batch_size=64,verbose=2);sec=time.perf_counter()-t;_,acc=m.evaluate(bt,bty,batch_size=256,verbose=0);r={'Model':name,'Parameters':int(m.count_params()),'Accuracy':float(acc),'Accuracy (%)':float(acc*100),'Training Time (s)':float(sec)};del m,b;gc.collect();return r
 arch.append(transfer(keras.applications.VGG16,keras.applications.vgg16.preprocess_input,'VGG16',4))
 arch.append(transfer(keras.applications.ResNet50,keras.applications.resnet50.preprocess_input,'ResNet50',10))
 adf=pd.DataFrame(arch);adf.to_csv(OUT/'architecture_comparison.csv',index=False)
-# Explicit additional exercise tables
-hdf=pd.DataFrame(hyp)
-hdf[hdf['Setting'].isin(['Baseline','Optimizer SGD'])].to_csv(OUT/'adam_vs_sgd.csv',index=False)
-with open(OUT/'complete_results.json','w') as f: json.dump({'hyperparameter_study':hyp,'architecture_comparison':arch},f,indent=2)
+hdf=pd.DataFrame(hyp);hdf[hdf['Setting'].isin(['Baseline','Optimizer SGD'])].to_csv(OUT/'adam_vs_sgd.csv',index=False)
+with open(OUT/'complete_results.json','w') as f: json.dump({'benchmark_training_images':4000,'benchmark_validation_images':1000,'benchmark_testing_images':1000,'hyperparameter_study':hyp,'architecture_comparison':arch},f,indent=2)
 print(adf);print(hdf)
