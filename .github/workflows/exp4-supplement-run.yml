@@ -18,6 +18,19 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install tensorflow-cpu==2.16.1 scikit-learn pandas matplotlib nbformat nbconvert ipykernel
+      - name: Use controlled fast architecture subset
+        if: ${{ hashFiles('Experiment_4_Supplement.ipynb') != '' }}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('Experiment_4_Supplement.ipynb')
+          s=p.read_text()
+          s=s.replace("train_size=3000,random_state=SEED,stratify=y_all", "train_size=1000,random_state=SEED,stratify=y_all")
+          s=s.replace("test_size=600,random_state=SEED,stratify=y_arch", "test_size=200,random_state=SEED,stratify=y_arch")
+          s=s.replace("train_size=1000,random_state=SEED,stratify=y_test_all", "train_size=500,random_state=SEED,stratify=y_test_all")
+          s=s.replace("epochs=2,batch_size=64,verbose=2", "epochs=1,batch_size=64,verbose=2")
+          p.write_text(s)
+          PY
       - name: Execute supplement
         if: ${{ hashFiles('Experiment_4_Supplement.ipynb') != '' }}
         run: |
