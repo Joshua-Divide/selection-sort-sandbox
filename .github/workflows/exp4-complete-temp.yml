@@ -1,0 +1,27 @@
+name: Experiment 4 Complete Temporary Run
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install tensorflow-cpu==2.16.1 scikit-learn pandas matplotlib
+      - name: Run complete experiment
+        run: python exp4_complete.py
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: experiment-4-complete-results
+          path: outputs_complete/
+          if-no-files-found: warn
+          retention-days: 7
