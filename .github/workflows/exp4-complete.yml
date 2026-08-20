@@ -2,6 +2,8 @@ name: Experiment 4 Complete Run
 on:
   push:
     branches: [exp4-complete-20260820]
+    paths-ignore:
+      - 'outputs_complete/**'
   workflow_dispatch:
 permissions:
   contents: write
